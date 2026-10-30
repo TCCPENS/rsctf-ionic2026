@@ -1,5 +1,12 @@
-import { Button, Group } from '@mantine/core'
-import { mdiCrosshairsGps, mdiCrown, mdiFlagVariant, mdiSwordCross } from '@mdi/js'
+import { Button, Group, Tooltip } from '@mantine/core'
+import {
+  mdiCrosshairsGps,
+  mdiCrown,
+  mdiDownload,
+  mdiFlagVariant,
+  mdiSwordCross,
+  mdiVpn,
+} from '@mdi/js'
 import { Icon } from '@mdi/react'
 import { useTranslation } from 'react-i18next'
 import { adRoundSecondsRemaining } from '@Utils/adState'
@@ -11,6 +18,7 @@ import classes from './CompetitionStatus.module.css'
 import { FlagDeliveryNotice } from './FlagDeliveryNotice'
 
 interface CompetitionStatusProps {
+  gameId: number
   state?: AdStateModel
   nowMs: number
   hasAd: boolean
@@ -23,6 +31,7 @@ interface CompetitionStatusProps {
 
 // Presentation only: the route remains the sole owner of the existing state read.
 export const CompetitionStatus = ({
+  gameId,
   state,
   nowMs,
   hasAd,
@@ -99,6 +108,7 @@ export const CompetitionStatus = ({
       aria-label={t('game.arena.scoring_status', 'Scoring status')}
       data-competition-status
     >
+      {/* Primary Metrics & Quick Actions */}
       <div className={classes.row}>
         <dl className={classes.metrics}>
           <div>
@@ -114,7 +124,7 @@ export const CompetitionStatus = ({
                   : t('game.content.ad.round_ends', 'Round ends')}
             </dt>
             <dd>
-              <span data-round-deadline role="timer" aria-live="off">
+              <span data-round-deadline role="timer" aria-live="off" style={{ color: seconds && seconds <= 15 ? 'var(--mantine-color-red-6)' : undefined }}>
                 {awaitingUpdate
                   ? t('game.arena.awaiting_round_update', 'Awaiting round update')
                   : seconds === null
@@ -136,13 +146,15 @@ export const CompetitionStatus = ({
             </>
           )}
         </dl>
-        <Group gap="xs" className={classes.tools}>
+
+        {/* Primary Action Buttons */}
+        <div className={classes.tools}>
           {hasAd && onAdTargets && (
             <Button
               color="red"
               variant="filled"
-              size="xs"
-              leftSection={<Icon path={mdiCrosshairsGps} size={0.8} aria-hidden="true" />}
+              size="sm"
+              leftSection={<Icon path={mdiCrosshairsGps} size={0.85} aria-hidden="true" />}
               onClick={onAdTargets}
             >
               {t('game.button.ad.targets', 'Target Lawan')}
@@ -152,35 +164,64 @@ export const CompetitionStatus = ({
             <Button
               color="grape"
               variant="filled"
-              size="xs"
-              leftSection={<Icon path={mdiFlagVariant} size={0.8} aria-hidden="true" />}
+              size="sm"
+              leftSection={<Icon path={mdiFlagVariant} size={0.85} aria-hidden="true" />}
               onClick={onAdSubmit}
             >
               {t('game.button.ad.submit_flag', 'Submit Flag')}
             </Button>
           )}
           {hasAd && (
-            <Button
-              variant="default"
-              size="xs"
-              leftSection={<Icon path={mdiSwordCross} size={0.8} aria-hidden="true" />}
-              onClick={onAdToolkit}
-            >
-              {t('game.button.ad.open_toolkit', 'A&D Toolkit')}
-            </Button>
+            <Tooltip label={t('game.tooltip.ad.toolkit_desc', 'Pengaturan SSH Key, API Token, & Panduan Teknis')}>
+              <Button
+                variant="default"
+                size="sm"
+                leftSection={<Icon path={mdiSwordCross} size={0.8} aria-hidden="true" />}
+                onClick={onAdToolkit}
+              >
+                {t('game.button.ad.open_toolkit', 'A&D Toolkit')}
+              </Button>
+            </Tooltip>
           )}
           {hasKoth && (
             <Button
               variant="default"
-              size="xs"
+              size="sm"
               leftSection={<Icon path={mdiCrown} size={0.8} aria-hidden="true" />}
               onClick={onKothToolkit}
             >
               {t('game.button.koth.open_toolkit', 'KotH Toolkit')}
             </Button>
           )}
-        </Group>
+        </div>
       </div>
+
+      {/* Sub-bar: Direct VPN Download Shortcut */}
+      {hasAd && (
+        <div className={classes.actionBar}>
+          <Group gap="xs">
+            <Icon path={mdiVpn} size={0.8} color="var(--mantine-color-blue-6)" />
+            <span style={{ fontSize: '0.8rem', color: 'var(--app-text-secondary)', fontWeight: 500 }}>
+              Jaringan VPN Kompetisi:
+            </span>
+          </Group>
+          <div className={classes.actionGroup}>
+            <Button
+              component="a"
+              href={`/api/Game/${gameId}/Ad/Vpn/Config`}
+              download
+              size="compact-xs"
+              variant="light"
+              color="blue"
+              leftSection={<Icon path={mdiDownload} size={0.7} />}
+            >
+              Download WireGuard VPN (.conf)
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Expandable Notice Drawer */}
       <details className={`${noticeClasses.notice} ${classes.messages}`} data-round-messages>
         <summary data-round-notices-toggle>
           <span className={classes.noticeSummary} role="status" aria-live="polite" aria-atomic="true">

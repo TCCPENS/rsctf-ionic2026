@@ -1,105 +1,152 @@
 .status {
   min-width: 0;
   border: 1px solid var(--app-border);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: var(--app-raised-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
   container-type: inline-size;
 }
+
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.25rem;
 }
+
 .metrics {
-  display: grid;
-  grid-template-columns: 7ch minmax(0, 14rem) 7ch 7ch;
-  align-items: start;
-  gap: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
   margin: 0;
   min-width: 0;
 }
+
 .metrics > div {
-  display: grid;
-  gap: 0.125rem;
-  min-width: 0;
-  padding-inline: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 4.5rem;
+  padding-inline: 0.75rem;
   border-inline-start: 1px solid var(--app-border-subtle);
 }
+
 .metrics > div:first-child {
   padding-inline-start: 0;
   border-inline-start: 0;
 }
+
 .metrics dt {
-  font-size: 0.6875rem;
-  line-height: 1.4;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--app-text-secondary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
+
 .metrics dd {
   margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  font-weight: 650;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.metrics .deadline dd {
-  font-size: 0.8125rem;
-}
+
 .tools {
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-.tools button {
+
+.tools button, .tools a {
   min-height: 36px;
+  font-weight: 600;
 }
-.messages {
-  padding: 0.125rem 0.75rem;
+
+/* Quick Action Bar for participants */
+.actionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(0, 0, 0, 0.02);
   border-top: 1px solid var(--app-border-subtle);
 }
-.messages > summary {
-  grid-template-columns: minmax(0, 1fr) auto;
-  height: 44px;
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
+
+.messages {
+  padding: 0.125rem 1.25rem;
+  border-top: 1px solid var(--app-border-subtle);
+}
+
+.messages > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  height: 38px;
+  cursor: pointer;
+}
+
 .noticeSummary {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.825rem;
 }
+
 .noticeContent {
-  /* Opening details is intentional; subsequent polls must not resize it. */
-  height: 16rem;
+  height: 12rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0.25rem;
+  padding: 0.5rem 0;
 }
+
 .noticeContent > details + details {
   border-top: 1px solid var(--app-border-subtle);
 }
-@container (max-width: 40rem) {
+
+@container (max-width: 45rem) {
+  .row {
+    padding: 0.75rem 1rem;
+  }
   .metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    flex: 1 1 100%;
-    gap: 0.75rem 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 0.75rem;
   }
   .metrics > div {
     padding-inline: 0;
     border-inline-start: 0;
   }
   .tools {
-    flex: 1 1 100%;
+    width: 100%;
   }
-  .tools button {
-    flex: 1;
-    min-width: 0;
-    min-height: 44px;
-    padding-inline: 0.4rem;
+  .tools button, .tools a {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+  .actionBar {
+    padding: 0.6rem 1rem;
+  }
+  .actionGroup {
+    width: 100%;
+  }
+  .actionGroup button, .actionGroup a {
+    flex: 1 1 100%;
   }
 }

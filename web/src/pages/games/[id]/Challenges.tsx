@@ -87,6 +87,7 @@ const Challenges: FC = () => {
           <Flex direction="column" gap="sm" w="100%">
             {!archived && hasAdEngine && (
               <CompetitionStatus
+                gameId={numId}
                 state={adState}
                 nowMs={serverNow.valueOf()}
                 hasAd={hasAdChallenges}

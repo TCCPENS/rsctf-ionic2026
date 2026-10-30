@@ -31,6 +31,7 @@ const render = async (snapshot: AdStateModel | undefined, hasAd = true) => {
         I18nextProvider,
         { i18n },
         createElement(CompetitionStatus, {
+          gameId: 1,
           state: snapshot,
           nowMs: now,
           hasAd,
