@@ -6,6 +6,8 @@ import { FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { AdGuideModal } from '@Components/AdGuideModal'
+import { AdFlagSubmitModal } from '@Components/competition/AdFlagSubmitModal'
+import { AdTargetsModal } from '@Components/competition/AdTargetsModal'
 import { useAdToken } from '@Components/AdToolkitSections'
 import { ChallengePanel } from '@Components/ChallengePanel'
 import { GameNoticePanel } from '@Components/GameNoticePanel'
@@ -55,6 +57,8 @@ const Challenges: FC = () => {
     [adState, adStateError, mutateAdState]
   )
   const [adGuideOpened, adGuideHandlers] = useDisclosure(false)
+  const [adTargetsOpened, adTargetsHandlers] = useDisclosure(false)
+  const [adSubmitOpened, adSubmitHandlers] = useDisclosure(false)
   const [kothGuideOpened, kothGuideHandlers] = useDisclosure(false)
   const tokenOwner = useAdToken(numId, hasAdEngine && !archived)
 
@@ -89,6 +93,8 @@ const Challenges: FC = () => {
                 hasKoth={hasKothChallenges}
                 onAdToolkit={adGuideHandlers.open}
                 onKothToolkit={kothGuideHandlers.open}
+                onAdTargets={adTargetsHandlers.open}
+                onAdSubmit={adSubmitHandlers.open}
               />
             )}
             <ChallengePanel
@@ -99,12 +105,24 @@ const Challenges: FC = () => {
           </Flex>
 
           {hasAdChallenges && (
-            <AdGuideModal
-              gameId={numId}
-              tokenOwner={tokenOwner}
-              opened={adGuideOpened}
-              onClose={adGuideHandlers.close}
-            />
+            <>
+              <AdGuideModal
+                gameId={numId}
+                tokenOwner={tokenOwner}
+                opened={adGuideOpened}
+                onClose={adGuideHandlers.close}
+              />
+              <AdTargetsModal
+                gameId={numId}
+                opened={adTargetsOpened}
+                onClose={adTargetsHandlers.close}
+              />
+              <AdFlagSubmitModal
+                gameId={numId}
+                opened={adSubmitOpened}
+                onClose={adSubmitHandlers.close}
+              />
+            </>
           )}
           {hasKothChallenges && (
             <KothGuideModal

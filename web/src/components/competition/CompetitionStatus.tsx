@@ -1,5 +1,5 @@
 import { Button, Group } from '@mantine/core'
-import { mdiCrown, mdiSwordCross } from '@mdi/js'
+import { mdiCrosshairsGps, mdiCrown, mdiFlagVariant, mdiSwordCross } from '@mdi/js'
 import { Icon } from '@mdi/react'
 import { useTranslation } from 'react-i18next'
 import { adRoundSecondsRemaining } from '@Utils/adState'
@@ -17,6 +17,8 @@ interface CompetitionStatusProps {
   hasKoth: boolean
   onAdToolkit: () => void
   onKothToolkit: () => void
+  onAdTargets?: () => void
+  onAdSubmit?: () => void
 }
 
 // Presentation only: the route remains the sole owner of the existing state read.
@@ -27,6 +29,8 @@ export const CompetitionStatus = ({
   hasKoth,
   onAdToolkit,
   onKothToolkit,
+  onAdTargets,
+  onAdSubmit,
 }: CompetitionStatusProps) => {
   const { t } = useTranslation()
   const seconds = adRoundSecondsRemaining(state?.roundEndsAt, nowMs, !!state?.scoringPaused, state?.scoringPausedAt)
@@ -133,6 +137,28 @@ export const CompetitionStatus = ({
           )}
         </dl>
         <Group gap="xs" className={classes.tools}>
+          {hasAd && onAdTargets && (
+            <Button
+              color="red"
+              variant="filled"
+              size="xs"
+              leftSection={<Icon path={mdiCrosshairsGps} size={0.8} aria-hidden="true" />}
+              onClick={onAdTargets}
+            >
+              {t('game.button.ad.targets', 'Target Lawan')}
+            </Button>
+          )}
+          {hasAd && onAdSubmit && (
+            <Button
+              color="grape"
+              variant="filled"
+              size="xs"
+              leftSection={<Icon path={mdiFlagVariant} size={0.8} aria-hidden="true" />}
+              onClick={onAdSubmit}
+            >
+              {t('game.button.ad.submit_flag', 'Submit Flag')}
+            </Button>
+          )}
           {hasAd && (
             <Button
               variant="default"
