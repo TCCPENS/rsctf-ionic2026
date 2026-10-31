@@ -4,6 +4,7 @@ import {
   mdiFlag,
   mdiLightningBolt,
   mdiPackageVariant,
+  mdiSwordCross,
   mdiTableArrowDown,
   mdiGhost,
   mdiRobotOutline,
@@ -36,6 +37,7 @@ export const WithGameMonitor: FC<WithGameMonitorProps> = ({ children, isLoading 
   const pages = [
     { icon: mdiLightningBolt, title: t('game.tab.monitor.events'), path: 'events' },
     { icon: mdiFlag, title: t('game.tab.monitor.submissions'), path: 'submissions' },
+    { icon: mdiSwordCross, title: t('game.tab.monitor.attacks', 'A&D Attacks'), path: 'attacks' },
     { icon: mdiGhost, title: t('game.tab.monitor.cheat'), path: 'cheatcheck' },
     { icon: mdiPackageVariant, title: t('game.tab.monitor.traffic'), path: 'traffic' },
     { icon: mdiRobotOutline, title: t('game.tab.monitor.ai_chats', 'AI chats'), path: 'ai-chats' },
