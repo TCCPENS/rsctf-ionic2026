@@ -6,6 +6,7 @@ import {
   Center,
   Checkbox,
   ComboboxItem,
+  FileButton,
   Group,
   Indicator,
   Modal,
@@ -31,6 +32,7 @@ import {
   mdiPlus,
   mdiRefresh,
   mdiTrashCanOutline,
+  mdiUpload,
 } from '@mdi/js'
 import { Icon } from '@mdi/react'
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -335,6 +337,50 @@ const GameChallengeEdit: FC = () => {
   const failedBuildCount =
     challenges?.filter((c) => c.buildStatus === 'Failed' || c.buildStatus === 'MissingDockerfile').length ?? 0
 
+  const [importingZip, setImportingZip] = useState(false)
+
+  const onImportZip = async (file: File | null) => {
+    if (!file || !numId || importingZip) return
+    setImportingZip(true)
+    const operationId = createOperationId()
+    try {
+      showNotification({
+        id: 'import-uploading',
+        loading: true,
+        message: t('admin.notification.challenges.importing', 'Uploading and importing challenge archive...'),
+        autoClose: false,
+      })
+      const res = await api.edit.editImportChallenge(numId, file, operationId)
+      const job = res.data
+      if (job?.jobId) {
+        // Poll import job until finished
+        let delayMs = 1500
+        while (true) {
+          await new Promise((r) => setTimeout(r, delayMs))
+          const check = await api.edit.editGetChallengeImportJob(numId, job.jobId)
+          const state = check.data
+          if (state && state.status === 'Succeeded') {
+            break
+          }
+          if (state && state.status === 'Failed') {
+            throw new Error(state.error || 'Import job Failed')
+          }
+        }
+      }
+      showNotification({
+        id: 'import-uploading',
+        color: 'teal',
+        message: t('admin.notification.challenges.imported', 'Challenge ZIP imported successfully!'),
+        icon: <Icon path={mdiCheck} size={1} />,
+      })
+      await mutate()
+    } catch (e) {
+      showErrorMsg(e, t)
+    } finally {
+      setImportingZip(false)
+    }
+  }
+
   const onBulkRebuild = () => {
     if (!numId || failedBuildCount === 0) return
     modals.openConfirmModal({
@@ -565,6 +611,20 @@ const GameChallengeEdit: FC = () => {
             >
               {t('admin.button.challenges.bonus')}
             </Button>
+            <FileButton onChange={onImportZip} accept="application/zip">
+              {(fileBtnProps) => (
+                <Button
+                  {...fileBtnProps}
+                  w={{ base: '100%', sm: 'auto' }}
+                  variant="outline"
+                  color="teal"
+                  loading={importingZip}
+                  leftSection={<Icon path={mdiUpload} size={1} />}
+                >
+                  {t('admin.button.challenges.import_zip', 'Import Challenge (.zip)')}
+                </Button>
+              )}
+            </FileButton>
             <Button
               w={{ base: '100%', sm: 'auto' }}
               leftSection={<Icon path={mdiPlus} size={1} />}
