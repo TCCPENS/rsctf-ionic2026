@@ -83,12 +83,12 @@
 }
 
 .statement {
-  max-width: 13ch;
+  max-width: 24ch;
   color: #f8fafc;
-  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  font-size: clamp(1.75rem, 2.75vw, 2.75rem);
   font-weight: 760;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 

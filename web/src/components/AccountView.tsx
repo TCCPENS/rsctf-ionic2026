@@ -27,7 +27,7 @@ export const AccountView: FC<AccountViewProps> = ({ title, description, onSubmit
         </Link>
         <Stack gap="md" className={classes.contextCopy}>
           <Text className={classes.eyebrow}>IONIC 2026 · PENS</Text>
-          <Text className={classes.statement}>Connect the World, Create the Future.</Text>
+          <Text className={classes.statement}>Empowering Future Engineers to Build and Secure Resilient Infrastructure</Text>
           <Text size="md" className={classes.contextDescription}>
             Selamat datang di Arena Kompetisi Cyber Security IONIC 2026. Masuk dengan akun tim Anda untuk memulai tantangan dan memantau persaingan secara langsung.
           </Text>
@@ -67,7 +67,7 @@ export const AccountView: FC<AccountViewProps> = ({ title, description, onSubmit
               {title}
             </Title>
             <Text c="dimmed" size="sm">
-              {description ?? (config?.slogan?.trim() || 'Capture. Compete. Conquer.')}
+              {description ?? (config?.slogan?.trim() || 'Empowering Future Engineers to Build and Secure Resilient Infrastructure')}
             </Text>
           </Stack>
 
