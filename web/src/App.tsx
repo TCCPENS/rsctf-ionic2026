@@ -134,7 +134,7 @@ const ThemedApp: FC = () => {
   const { theme } = useCustomTheme()
 
   return (
-    <MantineProvider theme={theme} defaultColorScheme="dark" deduplicateInlineStyles stylesTransform={emotionTransform}>
+    <MantineProvider theme={theme} defaultColorScheme="light" deduplicateInlineStyles stylesTransform={emotionTransform}>
       <MantineEmotionProvider>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <Notifications position="bottom-right" limit={5} zIndex={5000} className="app-notifications" />

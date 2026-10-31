@@ -26,31 +26,28 @@ export const AccountView: FC<AccountViewProps> = ({ title, description, onSubmit
           <LogoHeader />
         </Link>
         <Stack gap="md" className={classes.contextCopy}>
-          <Text className={classes.eyebrow}>{t('common.content.competition_workspace', 'Competition workspace')}</Text>
-          <Text className={classes.statement}>{config?.slogan?.trim() || 'Capture. Compete. Conquer.'}</Text>
+          <Text className={classes.eyebrow}>IONIC 2026 · PENS</Text>
+          <Text className={classes.statement}>Connect the World, Create the Future.</Text>
           <Text size="md" className={classes.contextDescription}>
-            {t(
-              'common.content.account_context',
-              'Sign in to join your team, solve challenges, and follow the competition in real time.'
-            )}
+            Selamat datang di Arena Kompetisi Cyber Security IONIC 2026. Masuk dengan akun tim Anda untuk memulai tantangan dan memantau persaingan secara langsung.
           </Text>
           <ol className={classes.steps}>
             <li>
               <span>01</span>
-              {t('common.workspace.account_step_team', 'Get your team together')}
+              Siapkan koneksi WireGuard VPN tim kamu
             </li>
             <li>
               <span>02</span>
-              {t('common.workspace.account_step_event', 'Join an event')}
+              Amankan layanan sendiri & serang target lawan
             </li>
             <li>
               <span>03</span>
-              {t('common.workspace.account_step_play', 'Solve, compete, and follow your progress')}
+              Submit flag captured & raih podium juara!
             </li>
           </ol>
         </Stack>
         <Text size="xs" className={classes.contextFooter}>
-          {config?.title?.trim() || 'IONIC 2026'}
+          {config?.title?.trim() || 'IONIC 2026'} · Politeknik Elektronika Negeri Surabaya
         </Text>
       </Box>
 
