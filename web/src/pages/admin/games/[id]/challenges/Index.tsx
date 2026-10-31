@@ -360,6 +360,11 @@ const GameChallengeEdit: FC = () => {
           const check = await api.edit.editGetChallengeImportJob(numId, job.jobId)
           const state = check.data
           if (state && state.status === 'Succeeded') {
+            const result = state.result
+            if (result && result.failed > 0) {
+              const msg = result.messages?.join('; ') || 'Import failed'
+              throw new Error(msg)
+            }
             break
           }
           if (state && state.status === 'Failed') {
