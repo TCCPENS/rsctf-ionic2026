@@ -7,6 +7,7 @@ import classes from '@Styles/LogoHeader.module.css'
 export const LogoHeader = forwardRef<HTMLDivElement, GroupProps & { logoSize?: string }>(
   ({ logoSize = '50px', ...props }, ref) => {
     const { config } = useConfig()
+    const appTitle = config?.title?.trim() || 'IONIC 2026'
     return (
       <Group ref={ref} wrap="nowrap" align="center" justify="flex-start" gap="sm" {...props}>
         <LogoBox size={logoSize} />
@@ -15,9 +16,9 @@ export const LogoHeader = forwardRef<HTMLDivElement, GroupProps & { logoSize?: s
           textWrap="nowrap"
           className={classes.title}
           lineClamp={1}
-          title={`${config?.title?.trim() || 'RS'}::CTF`}
+          title={`${appTitle} · Cyber Security`}
         >
-          {config?.title?.trim() || 'RS'}
+          {appTitle}
           <span className={classes.brand}>::</span>CTF
         </Title>
       </Group>

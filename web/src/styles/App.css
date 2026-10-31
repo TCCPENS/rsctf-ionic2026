@@ -11,7 +11,7 @@
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --app-focus-ring: #0f766e;
+  --app-focus-ring: #2a42de;
 
   /* Keep the persistent shell below Mantine's modal layer (200). */
   --app-z-shell: var(--mantine-z-index-app, 100);
@@ -41,7 +41,7 @@
   --app-accent-icon-surface: color-mix(in srgb, var(--mantine-primary-color-2) 72%, white);
   --app-accent-border: var(--mantine-color-semanticAccent-2);
   --app-grid-line: rgba(15, 23, 42, 0.027);
-  --app-focus-ring: #0f766e;
+  --app-focus-ring: #2a42de;
 }
 
 [data-mantine-color-scheme='dark'] {

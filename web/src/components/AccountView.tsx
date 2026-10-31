@@ -50,7 +50,7 @@ export const AccountView: FC<AccountViewProps> = ({ title, description, onSubmit
           </ol>
         </Stack>
         <Text size="xs" className={classes.contextFooter}>
-          {config?.title?.trim() || 'RS::CTF'}
+          {config?.title?.trim() || 'IONIC 2026'}
         </Text>
       </Box>
 

@@ -14,9 +14,9 @@ export const LogoBox = createPolymorphicComponent<'div', LogoProps>(
     return (
       <Box {...others} ref={ref} w={size} h={size}>
         {custom ? (
-          <Image src={custom} alt={`${config.title?.trim() || 'RSCTF'} logo`} w={size} h="auto" maw={size} mah={size} />
+          <Image src={custom} alt={`${config.title?.trim() || 'IONIC 2026'} logo`} w={size} h="auto" maw={size} mah={size} />
         ) : (
-          <MainIcon ignoreTheme={ignoreTheme} size={em(size)} />
+          <Image src="/ionic-logo.png" alt="IONIC 2026 Logo" w={size} h="auto" maw={size} mah={size} fallbackSrc="/favicon.png" />
         )}
       </Box>
     )
