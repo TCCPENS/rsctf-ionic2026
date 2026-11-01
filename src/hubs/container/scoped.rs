@@ -24,7 +24,63 @@ const GAME_ACCESS_SQL: &str = r#"
               FROM "GameManagers" manager
              WHERE manager.game_id = $1
                AND manager.user_id = $2
+        ) OR EXISTS (
+            SELECT 1
+              FROM "Participations" participation
+              JOIN "TeamMembers" member ON member.team_id = participation.team_id
+             WHERE participation.game_id = $1
+               AND member.user_id = $2
+               AND participation.status = 1
         )
+    )
+"#;
+
+const IS_GAME_MANAGER_SQL: &str = r#"
+    SELECT EXISTS (
+        SELECT 1
+          FROM "GameManagers"
+         WHERE game_id = $1 AND user_id = $2
+    )
+"#;
+
+const PARTICIPANT_TARGET_SQL: &str = r#"
+    SELECT service.container_id
+      FROM "AdTeamServices" service
+      JOIN "Participations" participation
+        ON participation.id = service.participation_id
+       AND participation.game_id = service.game_id
+      JOIN "TeamMembers" member
+        ON member.team_id = participation.team_id
+      JOIN "GameChallenges" challenge
+        ON challenge.id = service.challenge_id
+       AND challenge.game_id = service.game_id
+     WHERE service.container_id = $1
+       AND service.container_id <> ''
+       AND service.game_id = $2
+       AND member.user_id = $3
+       AND participation.status = 1
+       AND challenge.deletion_pending = FALSE
+"#;
+
+const PARTICIPANT_BYOC_TARGET_SQL: &str = r#"
+    SELECT EXISTS (
+        SELECT 1
+          FROM "Participations" participation
+          JOIN "TeamMembers" member ON member.team_id = participation.team_id
+          JOIN "Games" game
+            ON game.id = participation.game_id
+           AND game.deletion_pending = FALSE
+          JOIN "GameChallenges" challenge
+            ON challenge.id = $2
+           AND challenge.game_id = participation.game_id
+         WHERE participation.id = $1
+           AND participation.game_id = $3
+           AND member.user_id = $4
+           AND participation.status = 1
+           AND challenge."Type" = $5
+           AND challenge.ad_self_hosted = TRUE
+           AND challenge.is_enabled = TRUE
+           AND challenge.deletion_pending = FALSE
     )
 "#;
 
@@ -191,14 +247,18 @@ pub(super) async fn authorize_target(
     st: &SharedState,
     game_id: i32,
     target: Option<&str>,
+    user_id: Option<Uuid>,
+    is_admin: bool,
 ) -> Result<Option<ScopedExecTarget>, sqlx::Error> {
-    authorize_target_on(st.pg(), game_id, target).await
+    authorize_target_on(st.pg(), game_id, target, user_id, is_admin).await
 }
 
 async fn authorize_target_on(
     pool: &PgPool,
     game_id: i32,
     target: Option<&str>,
+    user_id: Option<Uuid>,
+    is_admin: bool,
 ) -> Result<Option<ScopedExecTarget>, sqlx::Error> {
     if game_id <= 0 {
         return Ok(None);
@@ -206,6 +266,49 @@ async fn authorize_target_on(
     let Some(target) = target.filter(|value| !value.is_empty()) else {
         return Ok(None);
     };
+
+    let is_privileged = if is_admin {
+        true
+    } else if let Some(uid) = user_id {
+        sqlx::query_scalar::<_, bool>(IS_GAME_MANAGER_SQL)
+            .bind(game_id)
+            .bind(uid)
+            .fetch_one(pool)
+            .await?
+    } else {
+        false
+    };
+
+    if !is_privileged {
+        let Some(uid) = user_id else {
+            return Ok(None);
+        };
+        if let Some(rest) = target.strip_prefix("byoc:") {
+            let Some((participation_id, challenge_id)) = parse_byoc_target(rest) else {
+                return Ok(None);
+            };
+            let allowed: bool = sqlx::query_scalar(PARTICIPANT_BYOC_TARGET_SQL)
+                .bind(participation_id)
+                .bind(challenge_id)
+                .bind(game_id)
+                .bind(uid)
+                .bind(ChallengeType::AttackDefense as i16)
+                .fetch_one(pool)
+                .await?;
+            return Ok(allowed.then_some(ScopedExecTarget::Byoc {
+                participation_id,
+                challenge_id,
+            }));
+        }
+
+        return sqlx::query_scalar::<_, String>(PARTICIPANT_TARGET_SQL)
+            .bind(target)
+            .bind(game_id)
+            .bind(uid)
+            .fetch_optional(pool)
+            .await
+            .map(|runtime_id| runtime_id.map(ScopedExecTarget::Docker));
+    }
 
     if let Some(rest) = target.strip_prefix("byoc:") {
         let Some((participation_id, challenge_id)) = parse_byoc_target(rest) else {
@@ -305,6 +408,11 @@ mod tests {
         ] {
             assert!(BYOC_TARGET_SQL.contains(gate), "missing gate: {gate}");
         }
+        assert!(GAME_ACCESS_SQL.contains("TeamMembers"));
+        assert!(GAME_ACCESS_SQL.contains("participation.status = 1"));
+        assert!(PARTICIPANT_TARGET_SQL.contains("member.user_id = $3"));
+        assert!(PARTICIPANT_TARGET_SQL.contains("participation.status = 1"));
+        assert!(PARTICIPANT_TARGET_SQL.contains("service.container_id = $1"));
     }
 
     async fn test_pool() -> (PgPool, PgPool, String) {
@@ -463,13 +571,13 @@ mod tests {
         let instance = Uuid::new_v4();
         insert_container(&pool, instance, "instance-1", Some(31), None, None).await;
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&instance.to_string()))
+            authorize_target_on(&pool, 1, Some(&instance.to_string()), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("instance-1".into()))
         );
         assert_eq!(
-            authorize_target_on(&pool, 2, Some(&instance.to_string()))
+            authorize_target_on(&pool, 2, Some(&instance.to_string()), None, true)
                 .await
                 .unwrap(),
             None
@@ -483,7 +591,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&test_container.to_string()))
+            authorize_target_on(&pool, 1, Some(&test_container.to_string()), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("test-1".into()))
@@ -497,7 +605,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&shared.to_string()))
+            authorize_target_on(&pool, 1, Some(&shared.to_string()), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("shared-1".into()))
@@ -506,7 +614,7 @@ mod tests {
         let inspector = Uuid::new_v4();
         insert_container(&pool, inspector, "inspector-1", None, None, Some(41)).await;
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&inspector.to_string()))
+            authorize_target_on(&pool, 1, Some(&inspector.to_string()), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("inspector-1".into()))
@@ -515,7 +623,7 @@ mod tests {
         let exercise = Uuid::new_v4();
         insert_container(&pool, exercise, "exercise", None, Some(9), None).await;
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&exercise.to_string()))
+            authorize_target_on(&pool, 1, Some(&exercise.to_string()), None, true)
                 .await
                 .unwrap(),
             None
@@ -529,33 +637,33 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(
-            authorize_target_on(&pool, 1, Some(&mixed.to_string()))
+            authorize_target_on(&pool, 1, Some(&mixed.to_string()), None, true)
                 .await
                 .unwrap(),
             None
         );
 
         assert_eq!(
-            authorize_target_on(&pool, 1, Some("ad-game-1"))
+            authorize_target_on(&pool, 1, Some("ad-game-1"), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("ad-game-1".into()))
         );
         assert_eq!(
-            authorize_target_on(&pool, 1, Some("ad-game-2"))
+            authorize_target_on(&pool, 1, Some("ad-game-2"), None, true)
                 .await
                 .unwrap(),
             None
         );
         assert_eq!(
-            authorize_target_on(&pool, 1, Some("koth-game-1"))
+            authorize_target_on(&pool, 1, Some("koth-game-1"), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Docker("koth-game-1".into()))
         );
 
         assert_eq!(
-            authorize_target_on(&pool, 1, Some("byoc:11:13"))
+            authorize_target_on(&pool, 1, Some("byoc:11:13"), None, true)
                 .await
                 .unwrap(),
             Some(ScopedExecTarget::Byoc {
@@ -565,7 +673,7 @@ mod tests {
         );
         for denied in ["byoc:21:13", "byoc:11:23", "byoc:11:13:1", "foreign"] {
             assert_eq!(
-                authorize_target_on(&pool, 1, Some(denied)).await.unwrap(),
+                authorize_target_on(&pool, 1, Some(denied), None, true).await.unwrap(),
                 None,
                 "{denied}"
             );
@@ -576,7 +684,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(
-            authorize_target_on(&pool, 1, Some("ad-game-1"))
+            authorize_target_on(&pool, 1, Some("ad-game-1"), None, true)
                 .await
                 .unwrap(),
             None

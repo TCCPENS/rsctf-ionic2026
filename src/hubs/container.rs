@@ -578,7 +578,16 @@ async fn open_target(
             }
         }
         ExecScope::Game(game_id) => {
-            let authorized = match scoped::authorize_target(st, game_id, guid).await {
+            let (user_id, is_admin) = match authorization {
+                ExecAuthorization::Game { token, .. } => {
+                    match crate::middlewares::privilege_authentication::authenticate_token(st, token).await {
+                        Ok(user) => (Some(user.id), user.is_admin()),
+                        Err(_) => (None, false),
+                    }
+                }
+                ExecAuthorization::PlatformAdmin { .. } => (None, true),
+            };
+            let authorized = match scoped::authorize_target(st, game_id, guid, user_id, is_admin).await {
                 Ok(Some(target)) => target,
                 Ok(None) => return None,
                 Err(error) => {
