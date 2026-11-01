@@ -616,6 +616,7 @@
       "solvers": "Solvers"
     },
     "scoreboard": "Scoreboard",
+    "matrix": "Attack Matrix",
     "submit": "Submit",
     "ad": "Attack & Defense"
   },

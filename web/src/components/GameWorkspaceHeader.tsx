@@ -1,5 +1,5 @@
 import { Badge, Card, Group, Stack, Text, Title } from '@mantine/core'
-import { mdiChartLine, mdiEarth, mdiFlagOutline, mdiMonitorEye, mdiUpload } from '@mdi/js'
+import { mdiChartLine, mdiEarth, mdiFlagOutline, mdiMonitorEye, mdiTableLarge, mdiUpload } from '@mdi/js'
 import { Icon } from '@mdi/react'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -77,6 +77,13 @@ export const GameWorkspaceHeader: FC<{ gameId: number; game?: DetailedGameInfoMo
       title: t('game.tab.scoreboard'),
       path: 'scoreboard',
       link: 'scoreboard',
+      requireRole: Role.User,
+    },
+    {
+      icon: mdiTableLarge,
+      title: t('game.tab.matrix', 'Matrix'),
+      path: 'matrix',
+      link: 'matrix',
       requireRole: Role.User,
     },
     {
