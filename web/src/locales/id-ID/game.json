@@ -82,7 +82,10 @@
       "uploading": "Mengunggah..."
     },
     "attack": "Live Attack",
-    "find_my_team": "Cari Tim Saya"
+    "find_my_team": "Cari Tim Saya",
+    "ad": {
+      "web_shell": "Terminal Web"
+    }
   },
   "content": {
     "ad": {
@@ -91,7 +94,8 @@
         "meaning": "Pada ronde {{round}}, RSCTF tidak dapat memastikan flag pertahanan baru telah sampai ke beberapa layanan tim. Jumlah ini mencakup seluruh acara, bukan jumlah serangan gagal atau selalu berarti tim kamu bermasalah.",
         "impact": "Layanan yang terdampak mungkin masih menyimpan flag lama. Pemberitahuan ini tidak menyebutkan tim yang terdampak dan tidak membuktikan adanya penalti skor.",
         "action": "Buka tantangan A&D kamu untuk memeriksa layanan dan koneksinya. Jika ada masalah, hubungi penyelenggara dengan menyertakan ronde dan nama tantangan. Penyelenggara perlu memeriksa operasi A&D dan log pengiriman flag sebelum mengubah atau memulai ulang layanan."
-      }
+      },
+      "checker_diagnostic": "Diagnostik Pemeriksa SLA"
     },
     "scoreboard": {
       "refresh_error": "Papan skor gagal diperbarui. Hasil sebelumnya ditampilkan."

@@ -6,6 +6,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useSWR, { type KeyedMutator } from 'swr'
 import { SnapshotDownloadButton } from '@Components/SnapshotDownloadButton'
+import { ContainerExecModal } from '@Components/admin/ContainerExecModal'
 import { FlagDeliveryNotice } from '@Components/competition/FlagDeliveryNotice'
 import { downloadBlob } from '@Utils/ApiHelper'
 import { assertJsonResponse } from '@Utils/ChallengePolling'
@@ -227,6 +228,7 @@ export const AdChallengePanel: FC<AdChallengePanelProps> = ({
     request: sshRequest,
   })
   const [resetting, setResetting] = useState(false)
+  const [webShellOpen, setWebShellOpen] = useState(false)
   const resetPromiseRef = useRef<Promise<void> | null>(null)
   const resetAbortRef = useRef<AbortController | null>(null)
   useEffect(() => () => resetAbortRef.current?.abort(), [])
@@ -321,54 +323,75 @@ export const AdChallengePanel: FC<AdChallengePanelProps> = ({
   // only show the snippet once they've registered a key — otherwise it
   // would just confuse a player whose first auth would fail anyway.
   const renderSshHint = () => {
-    if (!sshKey?.jumpHost) return null
-    const [host, port] = sshKey.jumpHost.split(':')
-    const cmd = `ssh ${challengeId}@${host} -p ${port ?? '22022'}`
-    return (
-      <Group gap={6} align="center" wrap="nowrap">
-        <Tooltip
-          label={
-            sshKey.exists
-              ? t('game.tooltip.ad.ssh_ready', 'SSH key is registered — connect any time')
-              : t('game.tooltip.ad.ssh_not_ready', 'Register an SSH key in the Toolkit first')
-          }
-        >
-          <Group gap={4} wrap="nowrap" style={{ opacity: sshKey.exists ? 1 : 0.5 }}>
-            <Icon path={mdiConsole} size={0.6} />
-            <Text size="xs" c="dimmed">
-              SSH:
-            </Text>
-          </Group>
-        </Tooltip>
-        <CopyButton value={cmd}>
-          {({ copied, copy }) => (
-            <Tooltip
-              label={
-                copied ? t('game.tooltip.copy.copied', 'Copied') : t('game.tooltip.copy.ssh_cmd', 'Copy ssh command')
-              }
-            >
-              <Text
-                className={misc.ffmono}
-                size="xs"
-                c={sshKey.exists ? undefined : 'dimmed'}
-                truncate
-                role="button"
-                tabIndex={0}
-                aria-label={t('game.tooltip.copy.ssh_cmd', 'Copy ssh command')}
-                style={{ cursor: 'pointer' }}
-                onClick={copy}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    copy()
-                  }
-                }}
-              >
-                {cmd}
+    const targetGuid = service?.containerId ?? service?.containerIp
+    const sshPart = sshKey?.jumpHost ? (() => {
+      const [host, port] = sshKey.jumpHost.split(':')
+      const cmd = `ssh ${challengeId}@${host} -p ${port ?? '22022'}`
+      return (
+        <Group gap={6} align="center" wrap="nowrap">
+          <Tooltip
+            label={
+              sshKey.exists
+                ? t('game.tooltip.ad.ssh_ready', 'SSH key is registered — connect any time')
+                : t('game.tooltip.ad.ssh_not_ready', 'Register an SSH key in the Toolkit first')
+            }
+          >
+            <Group gap={4} wrap="nowrap" style={{ opacity: sshKey.exists ? 1 : 0.5 }}>
+              <Icon path={mdiConsole} size={0.6} />
+              <Text size="xs" c="dimmed">
+                SSH:
               </Text>
-            </Tooltip>
-          )}
-        </CopyButton>
+            </Group>
+          </Tooltip>
+          <CopyButton value={cmd}>
+            {({ copied, copy }) => (
+              <Tooltip
+                label={
+                  copied ? t('game.tooltip.copy.copied', 'Copied') : t('game.tooltip.copy.ssh_cmd', 'Copy ssh command')
+                }
+              >
+                <Text
+                  className={misc.ffmono}
+                  size="xs"
+                  c={sshKey.exists ? undefined : 'dimmed'}
+                  truncate
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('game.tooltip.copy.ssh_cmd', 'Copy ssh command')}
+                  style={{ cursor: 'pointer' }}
+                  onClick={copy}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      copy()
+                    }
+                  }}
+                >
+                  {cmd}
+                </Text>
+              </Tooltip>
+            )}
+          </CopyButton>
+        </Group>
+      )
+    })() : null
+
+    if (!sshPart && !targetGuid) return null
+
+    return (
+      <Group gap="sm" align="center" wrap="wrap">
+        {sshPart}
+        {targetGuid && (
+          <Button
+            size="compact-xs"
+            variant="light"
+            color="blue"
+            leftSection={<Icon path={mdiConsole} size={0.7} />}
+            onClick={() => setWebShellOpen(true)}
+          >
+            {t('game.button.ad.web_shell', 'Web Shell')}
+          </Button>
+        )}
       </Group>
     )
   }
@@ -542,6 +565,21 @@ export const AdChallengePanel: FC<AdChallengePanelProps> = ({
         />
       )}
 
+      {service.lastCheckStatus && service.lastCheckStatus !== 'Ok' && service.lastCheckMessage && (
+        <Alert
+          color={statusColor(service.lastCheckStatus)}
+          variant="light"
+          py="xs"
+          px="sm"
+          icon={<Icon path={mdiAlertCircleOutline} size={0.8} />}
+          title={t('game.content.ad.checker_diagnostic', 'Checker Diagnostic')}
+        >
+          <Text size="xs" className={misc.ffmono} style={{ wordBreak: 'break-all' }}>
+            {service.lastCheckMessage}
+          </Text>
+        </Alert>
+      )}
+
       {service.containerIp && (
         <Group gap={6} align="center" wrap="nowrap">
           <Text size="xs" c="dimmed">
@@ -635,6 +673,16 @@ export const AdChallengePanel: FC<AdChallengePanelProps> = ({
       {!isSelfHosted && renderSshHint()}
 
       {snapshotDownload}
+
+      {service && (service.containerId || service.containerIp) && (
+        <ContainerExecModal
+          opened={webShellOpen}
+          onClose={() => setWebShellOpen(false)}
+          containerGuid={service.containerId ?? service.containerIp}
+          containerTitle={service.challengeTitle}
+          scopedGameId={gameId}
+        />
+      )}
     </Stack>
   )
 }

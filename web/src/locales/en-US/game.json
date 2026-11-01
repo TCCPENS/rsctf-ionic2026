@@ -71,7 +71,8 @@
       "copy_curl": "Copy curl",
       "copy_token": "Copy token",
       "download_vpn": "Download .conf",
-      "open_toolkit": "A&D Toolkit"
+      "open_toolkit": "A&D Toolkit",
+      "web_shell": "Web Shell"
     },
     "challenges": "Challenges",
     "delete": {
@@ -216,6 +217,7 @@
       "flag_to_defend": "Defending",
       "snapshot": "Post-game snapshot",
       "defend_target": "Your service",
+      "checker_diagnostic": "Checker Diagnostic",
       "flags_syncing": {
         "label": "Flags syncing — wait before attacking",
         "description": "This round’s flags are still syncing. Wait before attacking or updating your defended flag."

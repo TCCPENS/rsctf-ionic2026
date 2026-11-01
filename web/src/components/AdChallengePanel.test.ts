@@ -288,3 +288,11 @@ test('A&D failures stay retryable and a missing BYOC row never requests managed 
     restoreDom()
   }
 })
+
+test('A&D panel renders checker diagnostic snippet when status is non-Ok and renders Web Shell button when containerId is present', () => {
+  const source = readFileSync('src/components/AdChallengePanel.tsx', 'utf8')
+  assert.match(source, /lastCheckMessage/)
+  assert.match(source, /ContainerExecModal/)
+  assert.match(source, /containerId/)
+})
+

@@ -2913,9 +2913,11 @@ export interface AdTeamServiceStateModel {
   challengeTitle: string;
   containerIp?: string | null;
   containerPort?: number | null;
+  containerId?: string | null;
   /** The flag the team should currently be defending (their own). */
   currentFlag?: string | null;
   lastCheckStatus?: string | null;
+  lastCheckMessage?: string | null;
   /** @format uint64 */
   lastResetAt?: number | null;
   canReset: boolean;
