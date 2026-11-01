@@ -797,7 +797,7 @@ impl Drop for SandboxRunGuard {
 /// passed to the checker (the caller passes only the `RSCTF_*` contract — every
 /// other host env var, incl. rsctf's secrets, is stripped by `env_clear`).
 pub enum SandboxOutcome {
-    Exit(i32),
+    Exit(i32, Option<String>),
     TimedOut,
 }
 
@@ -884,20 +884,49 @@ pub async fn run(
     cmd.env("TMPDIR", &scratch);
     cmd.stdin(std::process::Stdio::null());
     cmd.stdout(std::process::Stdio::null());
-    cmd.stderr(std::process::Stdio::null());
+    cmd.stderr(std::process::Stdio::piped());
     // New process group so a timeout can kill the whole tree.
     cmd.process_group(0);
     cmd.kill_on_drop(true);
 
     let mut child = cmd.spawn()?;
     cleanup.arm(child.id());
+    let stderr_reader = child.stderr.take();
+    let stderr_task = tokio::spawn(async move {
+        if let Some(mut r) = stderr_reader {
+            use tokio::io::AsyncReadExt;
+            let mut buf = vec![0u8; 512];
+            let n = r.read(&mut buf).await.unwrap_or(0);
+            buf.truncate(n);
+            String::from_utf8_lossy(&buf).to_string()
+        } else {
+            String::new()
+        }
+    });
+
     // UID-pool contention is part of the caller's SLA window. It cannot extend
     // a round merely because another game saturated this process's budget.
     let remaining = timeout.saturating_sub(started.elapsed());
     let result = match tokio::time::timeout(remaining, child.wait()).await {
-        Ok(Ok(status)) => Ok(SandboxOutcome::Exit(
-            status.code().unwrap_or(SANDBOX_FAIL_EXIT),
-        )),
+        Ok(Ok(status)) => {
+            let stderr_str = stderr_task.await.ok().unwrap_or_default();
+            let clean_diag = {
+                let s = stderr_str.trim();
+                let last_line = s.lines().rev().find(|l| !l.trim().is_empty()).unwrap_or(s);
+                let trimmed = last_line.trim();
+                if trimmed.is_empty() {
+                    None
+                } else if trimmed.len() > 256 {
+                    Some(format!("{}...", &trimmed[..256]))
+                } else {
+                    Some(trimmed.to_string())
+                }
+            };
+            Ok(SandboxOutcome::Exit(
+                status.code().unwrap_or(SANDBOX_FAIL_EXIT),
+                clean_diag,
+            ))
+        }
         Ok(Err(error)) => Err(error),
         Err(_) => {
             // Timed out — kill the process group. A checker that can't complete

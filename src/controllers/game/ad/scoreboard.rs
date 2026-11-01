@@ -84,8 +84,10 @@ pub struct AdTeamServiceStateModel {
     pub challenge_title: String,
     pub container_ip: Option<String>,
     pub container_port: Option<i32>,
+    pub container_id: Option<String>,
     pub current_flag: Option<String>,
     pub last_check_status: Option<String>,
+    pub last_check_message: Option<String>,
     #[serde(with = "crate::utils::datetime::millis_opt")]
     pub last_reset_at: Option<DateTime<Utc>>,
     pub can_reset: bool,
@@ -628,8 +630,10 @@ pub async fn state(
                 challenge_title,
                 container_ip: live_operational_value(archived, s.host),
                 container_port: live_operational_value(archived, s.port),
+                container_id: live_operational_value(archived, s.container_id).flatten(),
                 current_flag: live_operational_value(archived, s.current_flag).flatten(),
                 last_check_status,
+                last_check_message: live_operational_value(archived, s.last_check_message).flatten(),
                 last_reset_at: s.last_reset_at,
                 // Self-hosted (BYOC): nothing on our side to relaunch, so never offer
                 // the reset button (RSCTF State reduction 1388: `&& !AdSelfHosted`).

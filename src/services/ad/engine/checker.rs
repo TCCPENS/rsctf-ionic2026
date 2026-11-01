@@ -562,10 +562,16 @@ async fn run_check(
     )
     .await
     {
-        Ok(super::sandbox::SandboxOutcome::Exit(code)) => (
-            map_exit_code(code as i64, true),
-            (code != 0).then(|| format!("checker exit {code}")),
-        ),
+        Ok(super::sandbox::SandboxOutcome::Exit(code, diag)) => {
+            let msg = if code == 0 {
+                None
+            } else if let Some(d) = diag {
+                Some(format!("checker exit {code}: {d}"))
+            } else {
+                Some(format!("checker exit {code}"))
+            };
+            (map_exit_code(code as i64, true), msg)
+        }
         Ok(super::sandbox::SandboxOutcome::TimedOut) => {
             CHECKER_TIMED_OUT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             if timeout_is_platform_limited {

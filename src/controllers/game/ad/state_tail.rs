@@ -21,6 +21,7 @@ pub(super) struct AdStateService {
     pub(super) last_reset_at: Option<DateTime<Utc>>,
     pub(super) current_flag: Option<String>,
     pub(super) last_check_status: Option<i16>,
+    pub(super) last_check_message: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -60,6 +61,7 @@ struct AdStateTailRow {
     last_reset_at: Option<DateTime<Utc>>,
     current_flag: Option<String>,
     last_check_status: Option<i16>,
+    last_check_message: Option<String>,
 }
 
 const STATE_TAIL_SQL: &str = r#"
@@ -106,7 +108,9 @@ SELECT game.event_started, game.event_ended,
        snapshot.id IS NOT NULL AND snapshot_file.reference_count > 0
            AS snapshot_available,
        service.last_reset_at,
-       flag.flag AS current_flag, latest.status AS last_check_status
+       flag.flag AS current_flag,
+       latest.status AS last_check_status,
+       latest.message AS last_check_message
   FROM (VALUES (1)) singleton(dummy)
   LEFT JOIN current_round round ON TRUE
   LEFT JOIN game_state game ON TRUE
@@ -119,7 +123,7 @@ SELECT game.event_started, game.event_ended,
   LEFT JOIN "AdFlags" flag
     ON flag.round_id = round.id AND flag.team_service_id = service.id
   LEFT JOIN LATERAL (
-      SELECT result.status
+      SELECT result.status, result.message
         FROM "AdCheckResults" result
        WHERE result.team_service_id = service.id
          AND result.sla_credit IS NOT NULL
@@ -183,6 +187,7 @@ fn reduce(rows: Vec<AdStateTailRow>) -> AppResult<AdStateTail> {
             last_reset_at: row.last_reset_at,
             current_flag: row.current_flag,
             last_check_status: row.last_check_status,
+            last_check_message: row.last_check_message,
         });
     }
     Ok(tail)
@@ -214,6 +219,7 @@ mod tests {
             last_reset_at: None,
             current_flag: None,
             last_check_status: None,
+            last_check_message: None,
         }
     }
 
@@ -282,6 +288,7 @@ mod tests {
             CREATE TEMP TABLE "AdCheckResults" (
               round_id INTEGER NOT NULL, team_service_id INTEGER NOT NULL,
               status SMALLINT NOT NULL, sla_credit DOUBLE PRECISION,
+              message TEXT,
               PRIMARY KEY (round_id, team_service_id)
             );
             CREATE TEMP TABLE "Files" (
@@ -360,8 +367,8 @@ mod tests {
         .unwrap();
         sqlx::query(
             r#"INSERT INTO "AdCheckResults" VALUES
-               (100, 21, 0, 1.0), (101, 21, 2, NULL),
-               (101, 22, 1, 0.5), (999, 31, 1, 1.0)"#,
+               (100, 21, 0, 1.0, 'ok'), (101, 21, 2, NULL, 'pending'),
+               (101, 22, 1, 0.5, 'diag: mumble error'), (999, 31, 1, 1.0, 'other')"#,
         )
         .execute(&mut connection)
         .await
@@ -387,8 +394,10 @@ mod tests {
             Some("current-flag")
         );
         assert_eq!(tail.services[0].last_check_status, Some(0));
+        assert_eq!(tail.services[0].last_check_message.as_deref(), Some("ok"));
         assert_eq!(tail.services[1].current_flag, None);
         assert_eq!(tail.services[1].last_check_status, Some(1));
+        assert_eq!(tail.services[1].last_check_message.as_deref(), Some("diag: mumble error"));
 
         let no_round = load(&mut connection, 2, 8).await.unwrap();
         assert_eq!(no_round.current_round, 0);
