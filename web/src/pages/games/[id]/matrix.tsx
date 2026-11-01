@@ -41,7 +41,7 @@ import {
 } from '@Utils/matrixModel'
 import { useGame, useGameStatus } from '@Hooks/useGame'
 import api, { Role } from '@Api'
-import classes from '@Styles/pages/Matrix.module.css'
+import classes from '@Styles/Matrix.module.css'
 
 const Matrix: FC = () => {
   const { id } = useParams()

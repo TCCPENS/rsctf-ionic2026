@@ -3,7 +3,7 @@ import cx from 'clsx'
 import { FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TeamMatrixData } from '@Utils/matrixModel'
-import classes from '@Styles/pages/Matrix.module.css'
+import classes from '@Styles/Matrix.module.css'
 
 interface AttackCrossMatrixProps {
   matrix: TeamMatrixData

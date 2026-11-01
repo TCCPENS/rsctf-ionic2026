@@ -6,7 +6,7 @@ import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLanguage } from '@Utils/I18n'
 import type { LiveMatrixAttackEvent } from '@Utils/matrixModel'
-import classes from '@Styles/pages/Matrix.module.css'
+import classes from '@Styles/Matrix.module.css'
 
 interface MatrixTickerProps {
   events: LiveMatrixAttackEvent[]

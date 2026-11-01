@@ -3,7 +3,7 @@ import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { calculateServiceHealth } from '@Utils/matrixModel'
 import type { AdScoreboardChallenge, AdTeamScoreModel } from '@Api'
-import classes from '@Styles/pages/Matrix.module.css'
+import classes from '@Styles/Matrix.module.css'
 
 interface ServiceSlaMatrixProps {
   teams: AdTeamScoreModel[]
