@@ -1,0 +1,198 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+  width: 100%;
+}
+
+.stageBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--app-raised-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tableWrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--app-raised-surface);
+}
+
+.matrixTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.825rem;
+}
+
+.matrixTable th,
+.matrixTable td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--app-border-subtle);
+  border-right: 1px solid var(--app-border-subtle);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.colHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--app-shell-surface);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-text-secondary);
+}
+
+.rowHeader {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+  background: var(--app-shell-surface);
+  text-align: left !important;
+  font-weight: 650;
+  color: var(--app-text-primary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cornerHeader {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 15;
+  background: var(--app-shell-surface);
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+}
+
+.cellSelf {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(148, 163, 184, 0.08),
+    rgba(148, 163, 184, 0.08) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  color: var(--app-text-muted);
+}
+
+.cellEmpty {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+
+.cellHit {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  font-weight: 700;
+  font-family: var(--mantine-font-family-monospace);
+  cursor: default;
+  transition: all 0.3s ease;
+}
+
+.cellFirstBlood {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #d97706 !important;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px #f59e0b;
+}
+
+@keyframes flashPulse {
+  0% {
+    transform: scale(1.15);
+    background: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cellFlash {
+  animation: flashPulse 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.summaryCol {
+  background: rgba(42, 66, 222, 0.05);
+  font-weight: 700;
+  color: var(--mantine-primary-color-6);
+  font-family: var(--mantine-font-family-monospace);
+}
+
+.tickerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--app-raised-surface);
+}
+
+.tickerStream {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.tickerCard {
+  flex: 0 0 auto;
+  min-width: 240px;
+  max-width: 300px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--app-shell-surface);
+}
+
+/* Projector Fullscreen Mode */
+:global(.projector-fullscreen) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  background: #060919 !important;
+  color: #f8fafc !important;
+  padding: 1.5rem !important;
+  overflow: auto !important;
+}
+
+:global(.projector-fullscreen) .stageBar {
+  background: #0c1438 !important;
+  border-color: #1e295d !important;
+  color: #f8fafc !important;
+}
+
+:global(.projector-fullscreen) .tableWrapper {
+  background: #0a1030 !important;
+  border-color: #1e295d !important;
+}
+
+:global(.projector-fullscreen) .colHeader,
+:global(.projector-fullscreen) .rowHeader,
+:global(.projector-fullscreen) .cornerHeader {
+  background: #0c1438 !important;
+  color: #f8fafc !important;
+  border-color: #1e295d !important;
+}
+
+:global(.projector-fullscreen) .matrixTable td,
+:global(.projector-fullscreen) .matrixTable th {
+  border-color: #1e295d !important;
+}
