@@ -226,6 +226,11 @@ pub(super) fn challenge_host_config(
         log_config: Some(super::bounded_log_config()),
         port_bindings,
         network_mode: docker_network_mode(spec),
+        runtime: spec.runtime_profile.as_deref().map(|p| match p {
+            "microvm" | "kata" | "kata-qemu" => "kata".to_string(),
+            "kata-clh" => "kata-clh".to_string(),
+            other => other.to_string(),
+        }),
         ..Default::default()
     }
 }
