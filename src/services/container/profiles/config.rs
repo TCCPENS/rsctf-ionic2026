@@ -114,12 +114,11 @@ pub fn parse(value: &str) -> AppResult<Vec<RuntimeProfile>> {
         match (profile.backend, profile.isolation, profile.runtime_class.as_deref()) {
             (ProfileBackend::Docker, Isolation::Container, None)
             | (ProfileBackend::Kubernetes, Isolation::Container, None) => {}
-            (ProfileBackend::Docker, Isolation::Microvm, _) => {}
             (ProfileBackend::Kubernetes, Isolation::Microvm, Some(class))
                 if !class.is_empty() && class.len() <= 63
                     && class.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
                     && !class.starts_with('-') && !class.ends_with('-') => {}
-            _ => return Err(AppError::bad_request("microVM profiles require Kubernetes with explicit Kata RuntimeClass or Docker with Kata runtime; container profiles must not set runtimeClass")),
+            _ => return Err(AppError::bad_request("microVM profiles require Kubernetes and an explicit Kata RuntimeClass; container profiles must not set runtimeClass")),
         }
     }
     Ok(profiles)

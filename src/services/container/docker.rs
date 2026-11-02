@@ -230,6 +230,8 @@ pub(super) fn challenge_host_config(
             "microvm" | "kata" | "kata-qemu" => "kata".to_string(),
             "kata-clh" => "kata-clh".to_string(),
             other => other.to_string(),
+        }).or_else(|| {
+            std::env::var("RSCTF_DOCKER_DEFAULT_RUNTIME").ok().filter(|r| !r.is_empty())
         }),
         ..Default::default()
     }
