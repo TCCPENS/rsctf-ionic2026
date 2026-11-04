@@ -1,10 +1,34 @@
-# RSCTF
+# RSCTF (IONIC 2026 Edition)
 
-**Turn puzzles into a game. Play with friends. Watch your team climb the scoreboard.**
+**Official Attack-Defense & Jeopardy CTF Platform for IONIC 2026 (PENS).**  
+*Forked and customized from [dimasma0305/rsctf](https://github.com/dimasma0305/rsctf).*
 
-Pick a challenge, find its secret answer (a *flag*), and earn points.
+Turn puzzles and infrastructure defense into a live, real-time competition. Featuring high-performance epoch-based A&D scoring, hardware-isolated Kata Containers MicroVMs, in-process SSH bastion routing, and dedicated stage projector displays.
 
-![Pick a puzzle from the Flag Quest challenge board](docs/public/screenshots/play.webp)
+![Live Attack Matrix and Arena Screen](docs/public/screenshots/play.webp)
+
+---
+
+## What's New in IONIC 2026 Edition
+
+This edition brings production-grade enhancements tailored for on-site and remote CTF championships:
+
+* **Live Attack Heatmap Matrix Screen (`/games/:id/matrix`)**:
+  - Fullscreen Projector Stage Mode with real-time WebSocket attack flashes.
+  - Interactive $N \times N$ Attacker vs. Victim cross-matrix and live SLA health tracker.
+  - Continuous marquee ticker for incoming flag captures.
+* **Kata Containers v4 (MicroVM) Isolation**:
+  - Hardware-assisted microVM isolation via `/dev/kvm` and `containerd-shim-kata-v2` (`RSCTF_DOCKER_DEFAULT_RUNTIME=kata`).
+  - Total kernel separation: guest workloads run isolated on dedicated guest kernels (`6.18.x`) preventing host container escape.
+* **SLA Checker Diagnostics Snippet**:
+  - Transparent error feedback (`Mumble` / `Offline` status reasons) rendered directly on the player's challenge panel to guide defense patching.
+* **Quick Action Controls**:
+  - 1-Click IP:Port Target Explorer with copy buttons.
+  - Single & Batch Flag Submission modals eliminating the need for terminal cURL.
+* **Themed for IONIC 2026**:
+  - Official Royal Blue (`#2a42de`) palette, light mode default, and PENS branding.
+
+---
 
 ## Start here
 
@@ -47,3 +71,4 @@ From your installed `rsctf` folder: **`./rsctf update`** updates the app; **`./r
 Want to build or contribute? See [CONTRIBUTE.md](CONTRIBUTE.md).
 
 Free and open source. [MIT License](LICENSE.txt) · [Licensing](LICENSING.md) · [NOTICE](NOTICE)
+
