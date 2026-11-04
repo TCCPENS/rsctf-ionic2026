@@ -95,8 +95,8 @@ Skenario Soal (Contoh: CyberTech Portal)
 2. **Port 22 Ditutup untuk Penyerang (Attacker)**:
    * Attacker hanya memiliki akses jaringan ke port yang di-expose di `challenge.yaml` (default: port `8080`).
    * Port 22 SSH tidak dibuka untuk tim lawan guna mencegah sabotase password (`passwd budi`) atau penguncian akun antar peserta.
-3. **Defender Mengakses Mesin via Bastion 2222 atau Web Shell**:
-   * Defender (pemilik kontainer) mengakses mesinnya sendiri menggunakan SSH Key melalui bastion port 2222 atau tombol **`[ >_ Web Shell ]`** langsung di web browser untuk melakukan patching.
+3. **Defender Mengakses Mesin via Bastion SSH Port 2222**:
+   * Defender (pemilik kontainer) mengakses mesinnya sendiri menggunakan SSH Key melalui bastion port 2222 untuk melakukan patching. Target dilindungi otentikasi kunci kriptografis per tim.
 
 ---
 

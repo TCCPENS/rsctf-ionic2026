@@ -71,8 +71,7 @@
       "copy_curl": "Copy curl",
       "copy_token": "Copy token",
       "download_vpn": "Download .conf",
-      "open_toolkit": "A&D Toolkit",
-      "web_shell": "Web Shell"
+      "open_toolkit": "A&D Toolkit"
     },
     "challenges": "Challenges",
     "delete": {

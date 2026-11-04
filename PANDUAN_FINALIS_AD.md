@@ -57,18 +57,16 @@ $$\text{Total Score} = \text{Attack Score} + \text{Defense Score} + \text{SLA Sc
 ## 4. Akses ke Server Tim & Dashboard Peserta
 
 ### A. Akses Server Tim Sendiri (Untuk Bertahan & Patching)
-Untuk memeriksa source code, membaca log, dan menambal celah pada mesin server tim Anda sendiri, disediakan dua pilihan akses resmi:
+Untuk memeriksa source code, membaca log, dan menambal celah pada mesin server tim Anda sendiri, peserta mengakses server menggunakan **Remote SSH Bastion (Port 2222)**:
 
-1. **Pilihan 1 — In-Browser Web Shell (Tanpa Perlu Setup):**
-   * Pada kartu tantangan di platform web lomba (`https://taniahacker.tccpens.id`), klik tombol **`[ >_ Web Shell ]`**.
-   * Terminal Linux interaktif berbasis web (*xterm.js*) akan langsung terbuka di browser Anda dengan hak akses `root` ke server tim sendiri.
-2. **Pilihan 2 — Remote SSH Client (Port 2222):**
-   * Buka menu **A&D Toolkit** di platform web.
-   * Unggah SSH Public Key Anda (`id_ed25519.pub` atau `id_rsa.pub`), atau klik **Generate Key** untuk mengunduh private key otomatis.
-   * Lakukan koneksi SSH dari terminal laptop:
-     ```bash
-     ssh -i /path/ke/private_key -p 2222 <challenge_id>@<IP_SERVER>
-     ```
+1. Buka menu **A&D Toolkit** di platform web lomba (`https://taniahacker.tccpens.id`).
+2. Unggah SSH Public Key Anda (`id_ed25519.pub` atau `id_rsa.pub`), atau klik **Generate Key** untuk mengunduh private key otomatis (`.key`).
+3. Lakukan koneksi SSH langsung dari terminal laptop peserta:
+   ```bash
+   ssh -i /path/ke/private_key -p 2222 <challenge_id>@<IP_SERVER>
+   ```
+   *(Contoh untuk Challenge 6: `ssh -i ~/.ssh/id_ed25519 -p 2222 6@103.148.19.64`)*.
+4. Anda akan langsung masuk sebagai user `root` di dalam kontainer server tim Anda sendiri untuk memeriksa kode dan menerapkan patch. Tim lawan tidak bisa login ke server Anda karena sistem otentikasi kunci kriptografis per-tim.
 
 ### B. Fitur Diagnostik & Reset Layanan
 * **Checker Diagnostics:** Jika layanan Anda berstatus *Mumble* atau *Offline*, panel tantangan akan menampilkan cuplikan pesan error dari bot checker (misal: `checker exit 1: expected HTTP 200 on /health, got 500`), sehingga Anda dapat mengetahui kesalahan kode saat patching.
