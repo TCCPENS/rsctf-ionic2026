@@ -87,10 +87,11 @@ Skenario Soal (Contoh: CyberTech Portal)
 
 ## 3. Aturan Jaringan & Keamanan Penting (Wajib Dipahami Probset)
 
-1. **Jaringan Bersifat Inbound Only (DILARANG Mewajibkan Reverse Shell Outbound)**:
-   * Kontainer A&D diisolasi ketat oleh firewall kernel platform (`allowEgress: false`).
-   * Kontainer **tidak bisa membuka koneksi keluar ke IP laptop peserta** (`connect to 10.13.0.x:9001` akan diblokir/DROP).
-   * **Wajib**: Alur eksploitasi harus berbasis **Inbound Web Command Execution / Webshell**. Payload dikirim via HTTP POST/GET dan output flag langsung dikembalikan pada respons HTTP.
+1. **Eksploitasi Berbasis RCE yang Fleksibel (Web Command Execution & Reverse Shell)**:
+   * Celah foothold yang dibuat probset harus merupakan **Remote Code Execution (RCE)** umum (seperti file upload, command injection, SSTI, deserialization).
+   * **Rekomendasi Utama untuk Peserta**: Alur pengambilan flag sebaiknya dapat dieksekusi melalui **Web Command Execution / Webshell HTTP** (payload dikirim via request dan flag kembali di response body), karena peserta A&D butuh melakukan automasi penyerangan serentak ke 15 tim lawan setiap ronde (tiap 60 detik).
+   * Jika jaringan kompetisi di lokasi (LAN lokal on-site) mengizinkan koneksi balik, peserta tetap bebas menggunakan **Reverse Shell** interaktif ke terminal netcat laptop mereka saat tahap eksplorasi awal.
+   * *Catatan Probset:* Jangan membuat soal yang memiliki ketergantungan wajib (*hard-coded dependency*) ke server pihak ketiga di internet publik, karena kontainer lomba selalu diisolasi dari internet luar.
 2. **Port 22 Ditutup untuk Penyerang (Attacker)**:
    * Attacker hanya memiliki akses jaringan ke port yang di-expose di `challenge.yaml` (default: port `8080`).
    * Port 22 SSH tidak dibuka untuk tim lawan guna mencegah sabotase password (`passwd budi`) atau penguncian akun antar peserta.
