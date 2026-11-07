@@ -1,0 +1,27 @@
+name: "VTS Tanjung Perak: Selat Madura Gate"
+author: "Distrik Navigasi Surabaya"
+category: Web
+type: AttackDefense
+description: |
+  ## VTS Tanjung Perak - Gate Surveillance Node
+  Stasiun Pemantauan Lalu Lintas Kapal (VTS) Pelabuhan Tanjung Perak memantau alur 
+  pelayaran kapal peti kemas di Selat Madura dan Alur Pelayaran Barat Surabaya (APBS).
+
+  Sebagai penyerang:
+  1. Eksploitasi kelemahan pembacaan log pada modul audit manifest pelabuhan.
+  2. Temukan berkas konfigurasi internal stasiun pantai untuk memperoleh identitas operator VTS.
+  3. Masuk ke konsol telemetri dan raih User Flag.
+  4. Manfaatkan skrip pemeliharaan sensor pasang surut air laut untuk mendapatkan Root Flag!
+
+  ## Catatan Bertahan (Defense):
+  - Dilarang mematikan port 8080 atau mematikan cron daemon (Penalti SLA).
+  - Lakukan penambalan (*patching*) langsung pada kode PHP atau hak akses berkas sistem via SSH Port 2222.
+disableBloodBonus: true
+container:
+  memoryLimit: 256
+  cpuCount: 1
+  exposePort: 8080
+ad:
+  allowEgress: false
+  allowSelfReset: true
+  selfHosted: false

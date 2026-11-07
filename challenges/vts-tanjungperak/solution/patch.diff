@@ -1,0 +1,36 @@
+--- a/html/manifest_logs.php
++++ b/html/manifest_logs.php
+@@ -10,18 +10,12 @@
+-$selected_source = isset($_GET['source']) ? trim($_GET['source']) : 'apbs_traffic_202611.log';
++$selected_source = isset($_GET['source']) ? basename(trim($_GET['source'])) : 'apbs_traffic_202611.log';
+
+-$log_dir = __DIR__ . '/logs/';
+-$log_path = $log_dir . $selected_source;
++$log_dir = realpath(__DIR__ . '/logs/');
++$log_path = realpath($log_dir . '/' . $selected_source);
+
+ $content = null;
+ $error = null;
+
+-if (file_exists($log_path) && !is_dir($log_path)) {
++if ($log_path && str_starts_with($log_path, $log_dir) && file_exists($log_path) && !is_dir($log_path)) {
+     $content = file_get_contents($log_path);
+ } else {
+-    // Fallback parser: memproses stream wrapper atau path absolut
+-    $direct = @file_get_contents($selected_source);
+-    if ($direct !== false) {
+-        $content = $direct;
+-    } else {
+-        $error = "Berkas log \"" . htmlspecialchars($selected_source) . "\" tidak ditemukan atau gagal dimuat.";
+-    }
++    $error = "Akses ditolak: berkas log tidak valid.";
+ }
+
+--- SYSTEM / CONFIGURATION LEVEL PATCHES:
+1. Amankan izin berkas konfigurasi kredensial stasiun:
+   chmod 600 /opt/vts/conf/ais_station.conf
+   chown vts_operator:vts_operator /opt/vts/conf/ais_station.conf
+
+2. Cabut izin modifikasi skrip cronjob root oleh grup vts_operator:
+   chown root:root /opt/vts/scripts/tide_depth_sync.sh
+   chmod 755 /opt/vts/scripts/tide_depth_sync.sh
