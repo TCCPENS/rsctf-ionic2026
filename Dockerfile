@@ -5,7 +5,7 @@ ARG RSCTF_DEFAULT_BYOC_AGENT_MULTIARCH="false"
 # The frontend output is architecture-independent. Build it natively on the
 # BuildKit host instead of running Node under QEMU for arm64 release images.
 FROM --platform=$BUILDPLATFORM node:22-bookworm AS web-builder
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 WORKDIR /web
 COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
