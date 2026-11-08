@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-"""
-SLA Checker Script untuk VTS Tanjung Perak (Surabaya)
-Memastikan:
-1. Endpoint /health.php mengembalikan HTTP 200 dan 'healthy'.
-2. Dashboard /index.php menampilkan tabel pemantauan kapal VTS.
-3. Modul /manifest_logs.php dapat membaca arsip log manifest pelabuhan.
-4. Halaman /console.php aktif melayani autentikasi operator.
-"""
 import http.client
 import json
 from lib import AdContext, Mumble, Offline, checker, run_ad_checker
@@ -14,7 +5,7 @@ from lib import AdContext, Mumble, Offline, checker, run_ad_checker
 def http_get(context: AdContext, path: str) -> tuple[int, str]:
     try:
         conn = http.client.HTTPConnection(context.target_ip, context.target_port, timeout=4)
-        conn.request("GET", path, headers={"Connection": "close", "User-Agent": "VTS-SLA-Checker/1.0"})
+        conn.request("GET", path, headers={"Connection": "close", "User-Agent": "VTS-SLA-Checker/2.0"})
         res = conn.getresponse()
         body = res.read(8192).decode("utf-8", errors="ignore").strip()
         conn.close()
@@ -42,10 +33,34 @@ def check_vts_dashboard(context: AdContext):
     status, body = http_get(context, "/index.php")
     if status != 200:
         raise Mumble(f"Halaman utama index.php mengembalikan HTTP {status}")
-    if "TANJUNG PERAK" not in body or "Kapal Terpantau" not in body:
+    if "TANJUNG PERAK" not in body or "Armada Aktif" not in body:
         raise Mumble("Elemen navigasi atau metrik kapal hilang dari dashboard utama")
     if "KM Dharma Rencana" not in body:
         raise Mumble("Tabel pergerakan kapal tidak memuat data kapal yang valid")
+
+@checker
+def check_berth_schedule(context: AdContext):
+    status, body = http_get(context, "/berth_schedule.php")
+    if status != 200:
+        raise Mumble(f"Halaman berth_schedule.php mengembalikan HTTP {status}")
+    if "Alokasi Tambatan" not in body or "Dermaga Jamrud" not in body:
+        raise Mumble("Tabel jadwal tambatan kade dermaga gagal dimuat")
+
+@checker
+def check_hydro_meteo(context: AdContext):
+    status, body = http_get(context, "/hydro_meteo.php")
+    if status != 200:
+        raise Mumble(f"Halaman hydro_meteo.php mengembalikan HTTP {status}")
+    if "Karang Jamuang" not in body or "Pasang Surut" not in body:
+        raise Mumble("Data sensor oseanografi stasiun Karang Jamuang gagal dimuat")
+
+@checker
+def check_navwarn(context: AdContext):
+    status, body = http_get(context, "/navwarn.php")
+    if status != 200:
+        raise Mumble(f"Halaman navwarn.php mengembalikan HTTP {status}")
+    if "NOTMAR" not in body or "Bahaya" not in body:
+        raise Mumble("Siaran maklumat keselamatan pelayaran gagal dimuat")
 
 @checker
 def check_manifest_log_viewer(context: AdContext):

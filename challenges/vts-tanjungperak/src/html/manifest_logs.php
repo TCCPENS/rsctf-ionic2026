@@ -9,12 +9,6 @@ $available_logs = [
 
 $selected_source = isset($_GET['source']) ? trim($_GET['source']) : 'apbs_traffic_202611.log';
 
-// =========================================================================
-// VULNERABILITY POINT: LFI / Stream Wrapper Path Traversal
-// Maksud kode: membaca berkas log dari direktori ./logs/
-// Celah: Adanya fallback ke file_get_contents($selected_source) atau path traversal
-// memungkinkan attacker membaca konfigurasi stasiun: /opt/vts/conf/ais_station.conf
-// =========================================================================
 $log_dir = __DIR__ . '/logs/';
 $log_path = $log_dir . $selected_source;
 
@@ -24,7 +18,6 @@ $error = null;
 if (file_exists($log_path) && !is_dir($log_path)) {
     $content = file_get_contents($log_path);
 } else {
-    // Fallback parser: memproses stream wrapper atau path absolut
     $direct = @file_get_contents($selected_source);
     if ($direct !== false) {
         $content = $direct;
@@ -37,13 +30,16 @@ if (file_exists($log_path) && !is_dir($log_path)) {
 <main class="main-content">
     <div class="card">
         <div class="card-header">
-            <span class="card-title">📜 Audit Log Manifest Kapal & Telemetri Stasiun</span>
+            <span class="card-title">
+                <?= vts_icon('log', 16, '#00f2fe') ?>
+                <span>Audit Log Manifest Kapal &amp; Telemetri Stasiun</span>
+            </span>
             <span class="badge badge-blue">TELEMETRY ARCHIVE</span>
         </div>
 
         <form method="GET" action="manifest_logs.php" style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
-            <label style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Pilih Log Manifest:</label>
-            <select name="source" class="form-input" style="max-width: 420px;" onchange="this.form.submit()">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Pilih Arsip Log:</label>
+            <select name="source" class="form-input" style="max-width: 440px;" onchange="this.form.submit()">
                 <?php foreach ($available_logs as $file => $label): ?>
                     <option value="<?= htmlspecialchars($file) ?>" <?= $selected_source == $file ? 'selected' : '' ?>>
                         <?= htmlspecialchars($label) ?> (<?= htmlspecialchars($file) ?>)
@@ -55,20 +51,23 @@ if (file_exists($log_path) && !is_dir($log_path)) {
                     </option>
                 <?php endif; ?>
             </select>
-            <button type="submit" class="btn btn-cyan">Muat Log</button>
+            <button type="submit" class="btn btn-cyan">
+                <?= vts_icon('search', 14, '#07111e') ?>
+                <span>Muat Log</span>
+            </button>
         </form>
 
         <?php if ($error): ?>
-            <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--accent-red); color: #f87171; padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;">
-                ⚠️ <?= $error ?>
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--accent-red); color: #f87171; padding: 12px 16px; border-radius: 6px; font-size: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <?= vts_icon('warning', 15, '#ef4444') ?>
+                <span><?= $error ?></span>
             </div>
         <?php endif; ?>
 
         <?php if ($content !== null): ?>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
-                    Sumber: <?= htmlspecialchars($selected_source) ?> (<?= strlen($content) ?> bytes)
-                </span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+                <span>Sumber: <?= htmlspecialchars($selected_source) ?> (<?= strlen($content) ?> bytes)</span>
+                <span>Enkoding: UTF-8 Plaintext</span>
             </div>
             <div class="log-box"><?= htmlspecialchars($content) ?></div>
         <?php endif; ?>

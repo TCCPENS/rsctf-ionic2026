@@ -1,9 +1,13 @@
 <footer>
-    <div>
-        <strong>Sistem Pelayanan Lalu Lintas Kapal (VTS) Surabaya</strong> • Distrik Navigasi Tipe A Kelas I Tanjung Perak
-    </div>
-    <div>
-        MARSEC Status: <span style="color: var(--accent-green); font-weight: bold;">LEVEL 1 (NORMAL)</span> • VHF Ch 12 / Ch 16
+    <div class="footer-inner">
+        <div>
+            <strong>Sistem Pelayanan Lalu Lintas Kapal (VTS) Surabaya</strong> • Distrik Navigasi Tipe A Kelas I Tanjung Perak
+        </div>
+        <div class="footer-status">
+            <span>MARSEC: <strong class="text-green">LEVEL 1 (NORMAL)</strong></span>
+            <span>•</span>
+            <span>VHF Telephony: <strong>Ch 12 (VTS) / Ch 16 (Distress) / Ch 72 (Tug)</strong></span>
+        </div>
     </div>
 </footer>
 
