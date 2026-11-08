@@ -175,14 +175,20 @@ async fn deliver_external_flag(
             // BYOC already has its own application-level ACK. Preserve its
             // existing participant attribution once the push operation starts.
             admission.mark_admitted();
-            let delivered = crate::services::byoc_tunnel::push_flag(
-                state,
-                planted.participation_id,
-                planted.challenge_id,
-                round_id,
-                &planted.flag,
-            )
-            .await;
+            let delivered = if !crate::services::ad_vpn::enabled() {
+                // When A&D VPN is disabled (physical LAN / external hypervisor bridge),
+                // flag delivery is performed out-of-band by the bridge daemon.
+                true
+            } else {
+                crate::services::byoc_tunnel::push_flag(
+                    state,
+                    planted.participation_id,
+                    planted.challenge_id,
+                    round_id,
+                    &planted.flag,
+                )
+                .await
+            };
             guard.participant();
             if delivered {
                 DeliveryAttempt::Delivered
