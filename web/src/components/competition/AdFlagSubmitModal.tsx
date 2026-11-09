@@ -151,7 +151,7 @@ export const AdFlagSubmitModal: FC<AdFlagSubmitModalProps> = ({ gameId, ...modal
             'game.ad.flag_input_desc',
             'Paste flag di sini. Jika lebih dari satu, pisahkan dengan baris baru (enter).'
           )}
-          placeholder={`flag{contoh_flag_tim_lawan_1}\nflag{contoh_flag_tim_lawan_2}`}
+          placeholder={`IONIC{contoh_flag_tim_lawan_1}\nIONIC{contoh_flag_tim_lawan_2}`}
           minRows={4}
           maxRows={8}
           autosize

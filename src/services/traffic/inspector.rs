@@ -692,25 +692,32 @@ fn packet_timestamp_millis(timestamp: Duration) -> i64 {
 }
 
 fn find_flag_markers(payload: &[u8]) -> (u32, Vec<u32>) {
-    const PREFIX: &[u8] = b"flag{";
+    const PREFIXES: [&[u8]; 2] = [b"IONIC{", b"flag{"];
     const MAX_FLAG_BYTES: usize = 256;
 
     let mut cursor = 0usize;
     let mut closing_brace = 0usize;
     let mut hits = 0u32;
     let mut offsets = Vec::new();
-    while cursor.saturating_add(PREFIX.len()) <= payload.len() && hits < MAX_FLAG_HITS_PER_FLOW {
-        let Some(relative) = payload[cursor..]
-            .windows(PREFIX.len())
-            .position(|candidate| candidate == PREFIX)
-        else {
+    while cursor < payload.len() && hits < MAX_FLAG_HITS_PER_FLOW {
+        let mut found: Option<(usize, usize)> = None;
+        for prefix in PREFIXES {
+            if cursor.saturating_add(prefix.len()) <= payload.len() {
+                if let Some(pos) = payload[cursor..].windows(prefix.len()).position(|c| c == prefix) {
+                    let abs_pos = cursor + pos;
+                    if found.map_or(true, |(earliest, _)| abs_pos < earliest) {
+                        found = Some((abs_pos, prefix.len()));
+                    }
+                }
+            }
+        }
+        let Some((start, prefix_len)) = found else {
             break;
         };
-        let start = cursor.saturating_add(relative);
-        let body_start = start.saturating_add(PREFIX.len());
+        let body_start = start.saturating_add(prefix_len);
         let end = body_start.saturating_add(MAX_FLAG_BYTES).min(payload.len());
         // Keep the closing-brace cursor monotonic. Searching the next 256-byte
-        // window from scratch for every `flag{` prefix makes a hostile payload
+        // window from scratch for every prefix makes a hostile payload
         // perform up to 256 scans per byte even though the capture-size bound
         // is otherwise linear.
         closing_brace = closing_brace.max(body_start);

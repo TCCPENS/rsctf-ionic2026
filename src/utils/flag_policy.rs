@@ -8,7 +8,7 @@
 use std::fmt;
 
 pub const NORMAL_FLAG_MAX_BYTES: usize = 127;
-pub const AD_FLAG_BYTES: usize = 38;
+pub const AD_FLAG_BYTES: usize = 39;
 
 const GUID_TOKEN: &str = "[GUID]";
 const UUID_TOKEN: &str = "[UUID]";
@@ -151,17 +151,25 @@ pub fn validate_dynamic_template(template: &str) -> Result<(), FlagPolicyError> 
     Ok(())
 }
 
-/// A&D round flags are exactly `flag{` + 32 URL-safe alphanumeric bytes + `}`.
+/// A&D round flags are `IONIC{` (or legacy `flag{`) + 32 URL-safe alphanumeric bytes + `}`.
 pub fn validate_ad(value: &str) -> Result<(), FlagPolicyError> {
-    const PREFIX: &[u8] = b"flag{";
+    const PREFIX_IONIC: &[u8] = b"IONIC{";
+    const PREFIX_FLAG: &[u8] = b"flag{";
     const PAYLOAD_BYTES: usize = 32;
     let bytes = value.as_bytes();
-    let valid = bytes.len() == AD_FLAG_BYTES
-        && bytes.starts_with(PREFIX)
-        && bytes.ends_with(b"}")
-        && bytes[PREFIX.len()..PREFIX.len() + PAYLOAD_BYTES]
-            .iter()
-            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-'));
+    let valid = if bytes.starts_with(PREFIX_IONIC) && bytes.len() == PREFIX_IONIC.len() + PAYLOAD_BYTES + 1 {
+        bytes.ends_with(b"}")
+            && bytes[PREFIX_IONIC.len()..PREFIX_IONIC.len() + PAYLOAD_BYTES]
+                .iter()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-'))
+    } else if bytes.starts_with(PREFIX_FLAG) && bytes.len() == PREFIX_FLAG.len() + PAYLOAD_BYTES + 1 {
+        bytes.ends_with(b"}")
+            && bytes[PREFIX_FLAG.len()..PREFIX_FLAG.len() + PAYLOAD_BYTES]
+                .iter()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-'))
+    } else {
+        false
+    };
     if valid {
         Ok(())
     } else {
@@ -229,8 +237,16 @@ mod tests {
     #[test]
     fn ad_policy_keeps_the_fixed_round_grammar() {
         assert_eq!(
+            validate_ad("IONIC{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}"),
+            Ok(())
+        );
+        assert_eq!(
             validate_ad("flag{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}"),
             Ok(())
+        );
+        assert_eq!(
+            validate_ad("IONIC{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd+/}"),
+            Err(FlagPolicyError::InvalidAdGrammar)
         );
         assert_eq!(
             validate_ad("flag{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd+/}"),

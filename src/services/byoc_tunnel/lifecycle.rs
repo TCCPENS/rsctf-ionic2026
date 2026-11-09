@@ -13,11 +13,11 @@ use crate::utils::error::{AppError, AppResult};
 const LATEST_DURABLE_FLAG_SQL: &str = r#"
     WITH latest AS (
         SELECT flag.round_id,
-               CASE WHEN OCTET_LENGTH(flag.flag) = 38
-                          AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+               CASE WHEN (OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+                          AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
                     THEN flag.flag END AS flag,
-               NOT (OCTET_LENGTH(flag.flag) = 38
-                    AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$') AS invalid
+               NOT ((OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+                    AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$') AS invalid
           FROM "AdTeamServices" service
           JOIN "AdFlags" flag ON flag.team_service_id = service.id
           JOIN "AdRounds" round
@@ -374,7 +374,7 @@ mod tests {
         ] {
             assert!(LATEST_DURABLE_FLAG_SQL.contains(predicate));
         }
-        assert!(LATEST_DURABLE_FLAG_SQL.contains("CASE WHEN OCTET_LENGTH(flag.flag) = 38"));
+        assert!(LATEST_DURABLE_FLAG_SQL.contains("CASE WHEN (OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)"));
         assert!(LATEST_DURABLE_FLAG_SQL.contains("[A-Za-z0-9_-]{32}"));
         assert!(!LATEST_DURABLE_FLAG_SQL.contains("AdFlagDeliveryResults"));
     }

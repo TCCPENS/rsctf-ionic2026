@@ -100,7 +100,7 @@ pub fn format_flag(random_bytes: &[u8]) -> String {
             out.push(ALPHABET[i as usize] as char);
         }
     }
-    format!("flag{{{out}}}")
+    format!("IONIC{{{out}}}")
 }
 
 /// Production flag generator: 24 cryptographically-random bytes → [`format_flag`].
@@ -926,8 +926,8 @@ async fn prepare_round_transaction(
               AND challenge.is_enabled = TRUE
               AND challenge.review_status = $4
               AND challenge."Type" = $5
-              AND OCTET_LENGTH(flag.flag) = 38
-              AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+              AND (OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+              AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
             ORDER BY service.id, flag.id"#,
         )
         .bind(round.0)

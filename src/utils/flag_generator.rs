@@ -29,10 +29,10 @@ pub fn exercise_user_hash(secret: &[u8], exercise_id: i32, user_id: Uuid) -> Str
 }
 
 /// Expand a flag template's placeholders. Supports `[GUID]`, `[UUID]`, and
-/// `[TEAM_HASH]`; a canonical blank template yields a random `flag{...}`.
+/// `[TEAM_HASH]`; a canonical blank template yields a random `IONIC{...}`.
 pub fn generate_flag(template: Option<&str>, team_hash: &str) -> String {
     match template.filter(|template| !crate::utils::flag_policy::is_blank(template)) {
-        None => format!("flag{{{}}}", random_hex(16)),
+        None => format!("IONIC{{{}}}", random_hex(16)),
         Some(t) => t
             .replace("[GUID]", &Uuid::new_v4().to_string())
             .replace("[UUID]", &Uuid::new_v4().to_string())
@@ -56,7 +56,7 @@ pub fn generate_retryable_flag(
     let guid = deterministic_uuid(&derive("guid"));
     let uuid = deterministic_uuid(&derive("uuid"));
     match template.filter(|template| !crate::utils::flag_policy::is_blank(template)) {
-        None => format!("flag{{{}}}", &derive("empty")[..32]),
+        None => format!("IONIC{{{}}}", &derive("empty")[..32]),
         Some(template) => template
             .replace("[GUID]", &guid)
             .replace("[UUID]", &uuid)
@@ -223,6 +223,7 @@ mod tests {
             first,
             generate_retryable_ad_flag("team-secret", "operation-2").unwrap()
         );
-        assert_eq!(first.len(), 38);
+        assert_eq!(first.len(), 39);
+        assert!(first.starts_with("IONIC{"));
     }
 }

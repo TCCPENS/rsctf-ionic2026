@@ -323,9 +323,9 @@ mod tests {
     fn format_flag_is_url_safe_and_wrapped() {
         let bytes = [0xFBu8, 0xEF, 0xBE]; // exercises the +/ → _- mapping
         let f = format_flag(&bytes);
-        assert!(f.starts_with("flag{"));
+        assert!(f.starts_with("IONIC{"));
         assert!(f.ends_with('}'));
-        let inner = &f[5..f.len() - 1];
+        let inner = &f[6..f.len() - 1];
         assert!(inner
             .chars()
             .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-'));

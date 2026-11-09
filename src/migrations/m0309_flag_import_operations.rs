@@ -177,8 +177,8 @@ SELECT service.challenge_id, NULL, 'ad_flag:' || flag.id::TEXT,
   FROM "AdFlags" flag
   JOIN "AdTeamServices" service ON service.id = flag.team_service_id
  WHERE NOT (
-       OCTET_LENGTH(flag.flag) = 38
-       AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+       OCTET_LENGTH(flag.flag) IN (38, 39)
+       AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
    )
 ON CONFLICT DO NOTHING;
 
@@ -274,8 +274,8 @@ BEGIN
         ALTER TABLE "AdFlags"
           ADD CONSTRAINT ck_adflags_canonical_flag
           CHECK (
-              OCTET_LENGTH(flag) = 38
-              AND flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+              OCTET_LENGTH(flag) IN (38, 39)
+              AND flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
           ) NOT VALID;
     END IF;
 

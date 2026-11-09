@@ -17,8 +17,8 @@ pub(super) const PENDING_AD_SERVICES_SQL: &str = r#"SELECT result.team_service_i
         WHERE result.round_id = $1
           AND result.sla_credit IS NULL
           AND delivery.delivered = TRUE
-          AND OCTET_LENGTH(flag.flag) = 38
-          AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+          AND (OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+          AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
           AND (delivery.delivery_kind <> 'Managed'
                OR delivery.container_id IS NOT DISTINCT FROM service.container_id)"#;
 
@@ -137,8 +137,8 @@ pub(super) async fn check_services(
                  FROM "AdFlags"
                 WHERE round_id = $1
                   AND team_service_id = ANY($2)
-                  AND OCTET_LENGTH(flag) = 38
-                  AND flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'"#,
+                  AND (OCTET_LENGTH(flag) = 38 OR OCTET_LENGTH(flag) = 39)
+                  AND flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'"#,
     )
     .bind(round_id)
     .bind(&service_ids)

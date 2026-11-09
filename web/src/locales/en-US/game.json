@@ -246,7 +246,7 @@
       "attack": {
         "title": "Attack",
         "description": "Submit a flag you captured from another team.",
-        "placeholder": "flag{...}",
+        "placeholder": "IONIC{...}",
         "recent": "Recent submissions"
       },
       "submit_status": {

@@ -77,12 +77,12 @@ pub(crate) async fn prepare_service_reset(
     #[allow(clippy::type_complexity)]
     let current: Option<(Option<i32>, Option<String>, bool, Option<String>)> = sqlx::query_as(
         r#"SELECT round.id,
-                  CASE WHEN OCTET_LENGTH(flag.flag) = 38
-                             AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'
+                  CASE WHEN (OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+                             AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'
                        THEN flag.flag END,
                   COALESCE(
-                    NOT (OCTET_LENGTH(flag.flag) = 38
-                         AND flag.flag ~ '^flag[{][A-Za-z0-9_-]{32}[}]$'),
+                    NOT ((OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39)
+                         AND flag.flag ~ '^(flag|IONIC)[{][A-Za-z0-9_-]{32}[}]$'),
                     FALSE
                   ) AS current_flag_invalid,
                   service.container_id

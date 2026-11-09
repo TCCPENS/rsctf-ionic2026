@@ -930,13 +930,16 @@ mod tests {
 
     #[test]
     fn malformed_or_oversized_flags_never_reach_postgres() {
+        assert!(is_plausible_flag("IONIC{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}"));
         assert!(is_plausible_flag("flag{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}"));
         for invalid in [
             "",
+            "IONIC{short}",
             "flag{short}",
-            "FLAG{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}",
+            "ionic{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}",
+            "IONIC{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd+/}",
             "flag{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd+/}",
-            "flag{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}suffix",
+            "IONIC{ABCDEFGHIJKLMNOPQRSTUVWXYZabcd_-}suffix",
         ] {
             assert!(!is_plausible_flag(invalid), "accepted {invalid:?}");
         }

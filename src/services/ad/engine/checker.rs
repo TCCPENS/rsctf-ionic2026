@@ -732,7 +732,7 @@ mod scheduling_tests {
     fn pending_roster_requires_unresolved_identity_matched_delivery() {
         assert!(ad::PENDING_AD_SERVICES_SQL.contains("result.sla_credit IS NULL"));
         assert!(ad::PENDING_AD_SERVICES_SQL.contains("delivery.delivered = TRUE"));
-        assert!(ad::PENDING_AD_SERVICES_SQL.contains("OCTET_LENGTH(flag.flag) = 38"));
+        assert!(ad::PENDING_AD_SERVICES_SQL.contains("OCTET_LENGTH(flag.flag) = 38 OR OCTET_LENGTH(flag.flag) = 39"));
         assert!(ad::PENDING_AD_SERVICES_SQL.contains("[A-Za-z0-9_-]{32}"));
         assert!(ad::PENDING_AD_SERVICES_SQL
             .contains("delivery.container_id IS NOT DISTINCT FROM service.container_id"));
